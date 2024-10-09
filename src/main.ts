@@ -72,6 +72,21 @@ app.post("/exercise/:exerciseId/:userId", async (req, res) => {
         return;
     }
 
+    const userExerciseRecords = await prisma.exerciseRecord.findMany({
+        where: {
+            userId,
+            ExerciseId: Number(exerciseId)
+        }
+    });
+
+    // 20分以内に同じエクササイズをやった場合はエラー
+    const now = new Date();
+    const lastExerciseRecord = userExerciseRecords[userExerciseRecords.length - 1];
+    if (lastExerciseRecord && now.getTime() - lastExerciseRecord.createdAt.getTime() < 20 * 60 * 1000) {
+        res.status(400).json({error: "too soon"});
+        return;
+    }
+
     const exerciseRecord = await prisma.exerciseRecord.create({
         data: {
             ExerciseId: Number(exerciseId),
