@@ -17,7 +17,7 @@ services:
     restart: always
     build: .
     environment:
-      DATABASE_URL:
-      ZOUBANK_API_TOKEN:
+      DATABASE_URL: postgres://postgres:postgres@db/postgres
+      ZOUBANK_API_TOKEN: 
     ports:
       - "3000:3000"
