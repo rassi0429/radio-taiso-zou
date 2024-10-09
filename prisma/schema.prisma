@@ -9,27 +9,25 @@ datasource db {
 }
 
 model User {
-  id              Int              @id @default(autoincrement())
-  email           String           @unique
-  name            String?
+  id              String           @id @unique
   exerciseRecords ExerciseRecord[]
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 }
 
 model ExerciseRecord {
-  id              Int           @id @default(autoincrement())
-  date            DateTime      @default(now())
-  user            User          @relation(fields: [userId], references: [id])
-  userId          Int
-  radioExercise   RadioExercise @relation(fields: [radioExerciseId], references: [id])
-  radioExerciseId Int
-  createdAt       DateTime      @default(now())
-  transactionId   String?
-  reward          Int?
+  id            Int      @id @default(autoincrement())
+  date          DateTime @default(now())
+  user          User     @relation(fields: [userId], references: [id])
+  userId        String
+  Exercise      Exercise @relation(fields: [ExerciseId], references: [id])
+  ExerciseId    Int
+  createdAt     DateTime @default(now())
+  transactionId String?
+  reward        Int?
 }
 
-model RadioExercise {
+model Exercise {
   id              Int              @id @default(autoincrement())
   name            String           @unique
   description     String?
