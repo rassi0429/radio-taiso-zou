@@ -1,8 +1,8 @@
 import "dotenv/config";
 
-import {PrismaClient} from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import express from "express";
-import {sendZouCoinAdmin} from "./bank";
+import { sendZouCoinAdmin } from "./bank";
 
 const prisma = new PrismaClient();
 
@@ -18,13 +18,13 @@ app.get("/", (req, res) => {
 app.get("/user/:userId", async (req, res) => {
     const userId = req.params.userId;
     const user = await prisma.user.findUnique({
-        where: {id: userId},
+        where: { id: userId },
         include: {
             exerciseRecords: true
         }
     });
     if (!user) {
-        res.status(404).json({error: "user not found"});
+        res.status(404).json({ error: "user not found" });
         return
     }
     res.json(user);
@@ -53,7 +53,7 @@ app.post("/exercise/:exerciseId/:userId", async (req, res) => {
     const memo = req.body.memo;
 
     let user = await prisma.user.findUnique({
-        where: {id: userId}
+        where: { id: userId }
     });
 
     if (!user) {
@@ -65,11 +65,11 @@ app.post("/exercise/:exerciseId/:userId", async (req, res) => {
     }
 
     const exercise = await prisma.exercise.findUnique({
-        where: {id: Number(exerciseId)}
+        where: { id: Number(exerciseId) }
     });
 
     if (!exercise) {
-        res.status(404).json({error: "exercise not found"});
+        res.status(404).json({ error: "exercise not found" });
         return;
     }
 
@@ -83,25 +83,26 @@ app.post("/exercise/:exerciseId/:userId", async (req, res) => {
     // 20分以内に同じエクササイズをやった場合はエラー
     const now = new Date();
     const lastExerciseRecord = userExerciseRecords[userExerciseRecords.length - 1];
-    if (lastExerciseRecord && now.getTime() - lastExerciseRecord.createdAt.getTime() < 20 * 60 * 1000) {
-        res.status(400).json({error: "too soon"});
+    if (lastExerciseRecord && now.getTime() - lastExerciseRecord.createdAt.getTime() < 60 * 60 * 1000) {
+        res.status(400).json({ error: "too soon" });
         return;
     }
 
     const exerciseRecord = await prisma.exerciseRecord.create({
         data: {
             ExerciseId: Number(exerciseId),
-            userId: user.id
+            userId: user.id,
+            reward: exercise.reward,
         }
     });
 
-    await sendZouCoinAdmin(userId, exercise.reward, exercise.name + " 報酬 " + memo);
+    await sendZouCoinAdmin(userId, exercise.reward, exercise.name + " 報酬 " + (memo ?? ""));
 
     res.json(exerciseRecord);
 })
 
 app.post("/admin/exercise", async (req, res) => {
-    const {name, reward} = req.body;
+    const { name, reward } = req.body;
     const exercise = await prisma.exercise.create({
         data: {
             name,
