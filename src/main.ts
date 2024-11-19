@@ -50,6 +50,7 @@ app.get("/exercise/:exerciseId/:userId", async (req, res) => {
 app.post("/exercise/:exerciseId/:userId", async (req, res) => {
     const userId = req.params.userId;
     const exerciseId = req.params.exerciseId;
+    const memo = req.body.memo;
 
     let user = await prisma.user.findUnique({
         where: {id: userId}
@@ -94,7 +95,7 @@ app.post("/exercise/:exerciseId/:userId", async (req, res) => {
         }
     });
 
-    await sendZouCoinAdmin(userId, exercise.reward, exercise.name + " 報酬")
+    await sendZouCoinAdmin(userId, exercise.reward, exercise.name + " 報酬 " + memo);
 
     res.json(exerciseRecord);
 })
